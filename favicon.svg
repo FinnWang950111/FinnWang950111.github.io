@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- 背景 -->
+  <rect width="32" height="32" rx="8" fill="#165DFF"/>
+  <!-- Qt风格的字母Q -->
+  <path d="M16,7C10.48,7,6,11.48,6,17s4.48,10,10,10s10-4.48,10-10S21.52,7,16,7z M16,25c-4.97,0-9-4.03-9-9s4.03-9,9-9s9,4.03,9,9S20.97,25,16,25z" fill="#FFFFFF"/>
+  <!-- 字母t -->
+  <path d="M18,12v10h3v-10H18z M22,18v-1h-2v1H22z" fill="#FFFFFF"/>
+  <!-- 下载图标 -->
+  <path d="M14,19v-3h4v3h5v2H9v-2H14z M17,13l-4,4h3v3h2v-3h3L17,13z" fill="#FFFFFF"/>
+</svg>
