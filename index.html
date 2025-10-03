@@ -785,9 +785,12 @@
             currentVersionFilter = version;
             updateFilters();
             
-            // 更新按钮样式
-            document.querySelectorAll('[onclick^="filterByVersion"]').forEach(btn => {
-                if (btn.textContent.includes(version === 'all' ? '所有版本' : version)) {
+            // 更新按钮样式 - 从父容器中选择所有按钮
+            document.querySelectorAll('#version-filter-buttons button').forEach(btn => {
+                if (btn.textContent === '所有版本' && version === 'all') {
+                    btn.classList.remove('bg-gray-100', 'text-gray-700');
+                    btn.classList.add('bg-primary', 'text-white');
+                } else if (btn.textContent === `${version}.x` && version !== 'all') {
                     btn.classList.remove('bg-gray-100', 'text-gray-700');
                     btn.classList.add('bg-primary', 'text-white');
                 } else {
