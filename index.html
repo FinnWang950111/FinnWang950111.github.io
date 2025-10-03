@@ -79,7 +79,7 @@
     </header>
 
     <!-- 英雄区域 -->
-    <section id="home" class="section-padding pt-32 md:pt-40">
+    <section id="home" class="section-padding pt-36 md:pt-40">
         <div class="container mx-auto px-4">
             <div class="flex flex-col md:flex-row items-center justify-between">
                 <div class="md:w-1/2 mb-10 md:mb-0">
@@ -87,7 +87,7 @@
                         Qt 安装包<br/><span class="text-primary">快速下载</span>
                     </h1>
                     <p class="text-lg text-gray-600 mb-8 max-w-lg">
-                        我们提供多个版本和不同操作系统的Qt安装包种子文件，帮助您快速获取Qt开发环境。更多版本正在补全中，敬请期待！
+                        我们提供多个版本和不同操作系统的Qt安装包种子文件，帮助您快速获取Qt开发环境。更多版本正在陆续更新中，敬请期待！
                     </p>
                     <div class="flex flex-col sm:flex-row gap-4">
                         <a href="#downloads" class="btn-primary flex items-center justify-center">
@@ -131,7 +131,7 @@
     </section>
 
     <!-- 下载区域 -->
-    <section id="downloads" class="py-20 bg-white">
+    <section id="downloads" class="py-16 md:py-20 bg-white">
         <div class="container mx-auto px-4">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">选择您需要的Qt版本</h2>
@@ -650,7 +650,10 @@
                     </h3>
                     <ol class="list-decimal list-inside space-y-4 text-gray-700">
                         <li class="pl-2">
-                            <strong>下载在线安装器：</strong> 访问南京大学镜像站 <a href="https://mirror.nju.edu.cn/qt/official_releases/online_installers/" target="_blank" class="text-blue-600 hover:underline">https://mirror.nju.edu.cn/qt/official_releases/online_installers/</a> 下载最新的在线安装器
+                            <strong>下载在线安装器：</strong> 访问南京大学镜像站 
+                            <a href="https://mirror.nju.edu.cn/qt/official_releases/online_installers/" target="_blank" class="text-blue-600 hover:underline inline-block break-all">
+                                https://mirror.nju.edu.cn/qt/official_releases/online_installers/
+                            </a> 下载最新的在线安装器
                         </li>
                         <li class="pl-2">
                             <strong>指定镜像运行安装器：</strong> 打开命令提示符(CMD)，导航到安装文件所在目录，执行以下命令（以Windows为例）：
@@ -664,7 +667,7 @@
                         <li class="pl-2">
                             <strong>勾选Archive选项：</strong> 在自定义界面中，勾选"Archive"选项以显示历史版本
                             <div class="mt-3 bg-white p-2 rounded-md border border-gray-200">
-                                <img src="archive.png" alt="Archive选项示意图" class="rounded-md max-w-full h-auto cursor-pointer" style="max-width: 400px;" ondblclick="showFullImage(this)">
+                                <img src="archive.png" alt="Archive选项示意图" class="rounded-md max-w-full h-auto cursor-pointer" style="max-width: 100%; height: auto;" ondblclick="showFullImage(this)">
                                 <p class="text-xs text-gray-500 mt-1 text-center">双击查看完整大小</p>
                             </div>
                         </li>
@@ -1202,7 +1205,7 @@
                     }
                     
                     window.scrollTo({
-                        top: targetElement.offsetTop - 80, // 考虑导航栏高度
+                        top: targetElement.offsetTop - 96, // 考虑导航栏高度，增加偏移量
                         behavior: 'smooth'
                     });
                 }
@@ -1211,17 +1214,30 @@
 
         // 导航栏滚动效果
         const header = document.querySelector('header');
+        const homeSection = document.getElementById('home');
         let lastScrollY = window.scrollY;
-        
-        window.addEventListener('scroll', () => {
+
+        // 初始化时也检查一下位置
+        function updateHeaderAndContent() {
             if (window.scrollY > 100) {
                 header.classList.add('py-2', 'shadow-md');
                 header.classList.remove('py-4', 'shadow-sm');
+                // 直接设置style.paddingTop以确保精确控制
+                homeSection.style.paddingTop = '9rem'; // 更大的值，确保足够的空间
             } else {
                 header.classList.add('py-4', 'shadow-sm');
                 header.classList.remove('py-2', 'shadow-md');
+                // 恢复原始padding-top
+                homeSection.style.paddingTop = '10rem'; // 更大的值，确保足够的空间
             }
-            
+        }
+
+        // 初始化时调用一次
+        updateHeaderAndContent();
+
+        // 滚动时更新
+        window.addEventListener('scroll', () => {
+            updateHeaderAndContent();
             lastScrollY = window.scrollY;
         });
 
