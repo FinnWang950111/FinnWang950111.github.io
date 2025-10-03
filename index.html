@@ -790,7 +790,10 @@
                 if (btn.textContent === '所有版本' && version === 'all') {
                     btn.classList.remove('bg-gray-100', 'text-gray-700');
                     btn.classList.add('bg-primary', 'text-white');
-                } else if (btn.textContent === `${version}.x` && version !== 'all') {
+                } else if (btn.textContent === '5.15以上版本' && version === '5.15+') {
+                    btn.classList.remove('bg-gray-100', 'text-gray-700');
+                    btn.classList.add('bg-primary', 'text-white');
+                } else if (btn.textContent === `${version}.x` && version !== 'all' && version !== '5.15+') {
                     btn.classList.remove('bg-gray-100', 'text-gray-700');
                     btn.classList.add('bg-primary', 'text-white');
                 } else {
@@ -823,7 +826,17 @@
             let visibleCount = 0;
             
             items.forEach(item => {
-                const versionMatch = currentVersionFilter === 'all' || item.dataset.version === currentVersionFilter;
+                // 处理5.15+特殊过滤条件
+                let versionMatch = false;
+                if (currentVersionFilter === 'all') {
+                    versionMatch = true;
+                } else if (currentVersionFilter === '5.15+') {
+                    // 只显示qt-online安装包（data-type为online的项）
+                    versionMatch = item.dataset.type === 'online';
+                } else {
+                    versionMatch = item.dataset.version === currentVersionFilter;
+                }
+                
                 const osMatch = currentOSFilter === 'all' || item.dataset.os === currentOSFilter;
                 
                 // 搜索匹配逻辑
@@ -888,6 +901,13 @@
             allVersionsBtn.textContent = '所有版本';
             allVersionsBtn.onclick = function() { filterByVersion('all'); };
             buttonsContainer.appendChild(allVersionsBtn);
+            
+            // 创建"5.15以上版本"按钮
+            const latestVersionsBtn = document.createElement('button');
+            latestVersionsBtn.className = 'px-4 py-2 rounded-full bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-colors';
+            latestVersionsBtn.textContent = '5.15以上版本';
+            latestVersionsBtn.onclick = function() { filterByVersion('5.15+'); };
+            buttonsContainer.appendChild(latestVersionsBtn);
             
             // 从torrentFiles中提取所有唯一的版本前缀
             const uniqueVersions = new Set();
@@ -973,6 +993,83 @@
                             <span class="flex items-center"><i class="fa fa-clock-o mr-1"></i> ${file.release_date}</span>
                         </div>
                         <a href="torrent/${file.filename}" class="w-full btn-primary flex items-center justify-center" onclick="trackDownload('${file.filename}')">
+                            <i class="fa fa-magnet mr-2"></i> 下载种子
+                        </a>
+                    </div>
+                `;
+                
+                downloadGrid.appendChild(card);
+            });
+            
+            // 添加Qt Online安装程序下载选项 - 使用本地torrent文件
+            const onlineInstallers = [
+                {
+                    version: '4.10.0',
+                    os: 'windows',
+                    os_display: 'Windows (在线安装器)',
+                    osIcon: 'fa-windows text-blue-600',
+                    filename: 'qt-online-installer-windows-x64-4.10.0.exe.torrent',
+                    arch: 'x64'
+                },
+                {
+                    version: '4.10.0',
+                    os: 'windows',
+                    os_display: 'Windows ARM64 (在线安装器)',
+                    osIcon: 'fa-windows text-blue-600',
+                    filename: 'qt-online-installer-windows-arm64-4.10.0.exe.torrent',
+                    arch: 'arm64'
+                },
+                {
+                    version: '4.10.0',
+                    os: 'mac',
+                    os_display: 'macOS (在线安装器)',
+                    osIcon: 'fa-apple text-gray-700',
+                    filename: 'qt-online-installer-macOS-x64-4.10.0.dmg.torrent',
+                    arch: 'x64'
+                },
+                {
+                    version: '4.10.0',
+                    os: 'linux',
+                    os_display: 'Linux (在线安装器)',
+                    osIcon: 'fa-linux text-orange-600',
+                    filename: 'qt-online-installer-linux-x64-4.10.0.run.torrent',
+                    arch: 'x64'
+                },
+                {
+                    version: '4.10.0',
+                    os: 'linux',
+                    os_display: 'Linux ARM64 (在线安装器)',
+                    osIcon: 'fa-linux text-orange-600',
+                    filename: 'qt-online-installer-linux-arm64-4.10.0.run.torrent',
+                    arch: 'arm64'
+                }
+            ];
+            
+            // 为每个在线安装器创建下载卡片
+            onlineInstallers.forEach(installer => {
+                const card = document.createElement('div');
+                card.className = 'bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-100 rounded-xl overflow-hidden shadow-md card-hover';
+                card.dataset.version = '5.15+';
+                card.dataset.type = 'online';
+                card.dataset.os = installer.os;
+                
+                card.innerHTML = `
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <i class="fa ${installer.osIcon} text-2xl mr-3"></i>
+                                <div>
+                                    <h3 class="font-semibold text-lg text-gray-900">Qt Online ${installer.version}</h3>
+                                    <p class="text-sm text-gray-500">${installer.os_display} (${installer.arch})</p>
+                                </div>
+                            </div>
+                            <span class="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2.5 py-0.5 rounded">在线安装器</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500 mb-4">
+                            <span class="flex items-center mr-4"><i class="fa fa-torrent mr-1"></i> 种子下载</span>
+                            <span class="flex items-center"><i class="fa fa-refresh mr-1"></i> 安装器版本</span>
+                        </div>
+                        <a href="torrent/${installer.filename}" class="w-full btn-primary flex items-center justify-center" onclick="trackDownload('${installer.filename}')">
                             <i class="fa fa-magnet mr-2"></i> 下载种子
                         </a>
                     </div>
