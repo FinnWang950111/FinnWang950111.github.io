@@ -87,7 +87,7 @@
                         Qt 安装包<br/><span class="text-primary">快速下载</span>
                     </h1>
                     <p class="text-lg text-gray-600 mb-8 max-w-lg">
-                        我们提供多个版本和不同操作系统的Qt安装包种子文件，帮助您快速获取Qt开发环境。
+                        我们提供多个版本和不同操作系统的Qt安装包种子文件，帮助您快速获取Qt开发环境。更多版本正在补全中，敬请期待！
                     </p>
                     <div class="flex flex-col sm:flex-row gap-4">
                         <a href="#downloads" class="btn-primary flex items-center justify-center">
@@ -95,6 +95,9 @@
                         </a>
                         <a href="#about" class="btn-secondary flex items-center justify-center">
                             <i class="fa fa-info-circle mr-2"></i> 了解更多
+                        </a>
+                        <a href="#" onclick="showDonationModal(); return false;" class="btn-secondary flex items-center justify-center">
+                            <i class="fa fa-heart mr-2"></i> 赞赏
                         </a>
                     </div>
                     <div class="flex items-center mt-8 space-x-4">
@@ -1135,6 +1138,14 @@
                 
                 downloadGrid.appendChild(card);
             });
+        }
+        
+        // 显示赞赏模态框函数
+        function showDonationModal() {
+            const donationModal = document.getElementById('donation-modal');
+            donationModal.classList.remove('hidden');
+            donationModal.classList.add('flex');
+            document.body.classList.add('overflow-hidden');
         }
         
         // 跟踪下载并显示赞赏图片
