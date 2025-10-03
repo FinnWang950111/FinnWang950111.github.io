@@ -151,19 +151,8 @@
                     </div>
                 </div>
                 
-                <div class="flex flex-wrap gap-3 mb-6">
-                    <button class="px-4 py-2 rounded-full bg-primary text-white font-medium" onclick="filterByVersion('all')">
-                        所有版本
-                    </button>
-                    <button class="px-4 py-2 rounded-full bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-colors" onclick="filterByVersion('5.12')">
-                        5.12.x
-                    </button>
-                    <button class="px-4 py-2 rounded-full bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-colors" onclick="filterByVersion('5.13')">
-                        5.13.x
-                    </button>
-                    <button class="px-4 py-2 rounded-full bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-colors" onclick="filterByVersion('5.14')">
-                        5.14.x
-                    </button>
+                <div class="flex flex-wrap gap-3 mb-6" id="version-filter-buttons">
+                    <!-- 版本过滤按钮将通过JavaScript动态生成 -->
                 </div>
                 
                 <div class="flex flex-wrap gap-3">
@@ -737,28 +726,13 @@
                     <i class="fa fa-cube text-primary text-2xl"></i>
                     <h1 class="text-xl font-bold">Qt下载助手</h1>
                 </div>
-                <div class="flex space-x-6">
-                    <a href="https://github.com" target="_blank" class="text-gray-400 hover:text-white transition-colors">
-                        <i class="fa fa-github text-xl"></i>
-                    </a>
-                    <a href="https://twitter.com" target="_blank" class="text-gray-400 hover:text-white transition-colors">
-                        <i class="fa fa-twitter text-xl"></i>
-                    </a>
-                    <a href="https://www.youtube.com" target="_blank" class="text-gray-400 hover:text-white transition-colors">
-                        <i class="fa fa-youtube-play text-xl"></i>
-                    </a>
-                </div>
+
             </div>
             <div class="border-t border-gray-800 pt-8">
                 <div class="flex flex-col md:flex-row justify-between items-center">
                     <p class="text-gray-400 mb-4 md:mb-0">
                         &copy; 2025 Qt下载助手. 保留所有权利.
                     </p>
-                    <div class="flex space-x-6">
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors text-sm">隐私政策</a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors text-sm">使用条款</a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors text-sm">联系我们</a>
-                    </div>
                 </div>
             </div>
         </div>
@@ -900,6 +874,46 @@
             }
         }
         
+        // 动态生成版本过滤按钮
+        function generateVersionFilterButtons() {
+            const buttonsContainer = document.getElementById('version-filter-buttons');
+            buttonsContainer.innerHTML = '';
+            
+            // 创建"所有版本"按钮
+            const allVersionsBtn = document.createElement('button');
+            allVersionsBtn.className = 'px-4 py-2 rounded-full bg-primary text-white font-medium';
+            allVersionsBtn.textContent = '所有版本';
+            allVersionsBtn.onclick = function() { filterByVersion('all'); };
+            buttonsContainer.appendChild(allVersionsBtn);
+            
+            // 从torrentFiles中提取所有唯一的版本前缀
+            const uniqueVersions = new Set();
+            torrentFiles.forEach(file => {
+                uniqueVersions.add(file.version_prefix);
+            });
+            
+            // 将Set转换为数组并按版本号降序排序
+            const sortedVersions = Array.from(uniqueVersions).sort((a, b) => {
+                // 按版本号排序（降序）
+                const [aMajor, aMinor] = a.split('.').map(Number);
+                const [bMajor, bMinor] = b.split('.').map(Number);
+                
+                if (aMajor !== bMajor) {
+                    return bMajor - aMajor;
+                }
+                return bMinor - aMinor;
+            });
+            
+            // 为每个版本创建按钮
+            sortedVersions.forEach(version => {
+                const btn = document.createElement('button');
+                btn.className = 'px-4 py-2 rounded-full bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-colors';
+                btn.textContent = `${version}.x`;
+                btn.onclick = function() { filterByVersion(version); };
+                buttonsContainer.appendChild(btn);
+            });
+        }
+
         // 清除所有筛选条件
         function clearSearchAndFilters() {
             searchInput.value = '';
@@ -932,11 +946,12 @@
                 }[file.os];
                 
                 const versionClass = {
+                    '5.10': 'bg-red-100 text-red-800',
+                    '5.11': 'bg-yellow-100 text-yellow-800',
                     '5.12': 'bg-blue-100 text-blue-800',
                     '5.13': 'bg-purple-100 text-purple-800',
                     '5.14': 'bg-green-100 text-green-800'
-                }[file.version_prefix] || 'bg-gray-100 text-gray-800';
-                
+                }[file.version_prefix] || 'bg-gray-100 text-gray-800';                
                 card.innerHTML = `
                     <div class="p-6">
                         <div class="flex items-center justify-between mb-4">
@@ -1032,6 +1047,7 @@
         // 页面加载时的动画和初始化
         window.addEventListener('load', () => {
             generateDownloadItems();
+            generateVersionFilterButtons();
             document.body.classList.add('loaded');
         });
     </script>
