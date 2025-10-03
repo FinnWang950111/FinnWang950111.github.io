@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qt下载助手</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="torrent_data.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#0A2463',
+                        accent: '#3E92CC',
+                        neutral: '#F7FAFC',
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-hover {
+                @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+            }
+            .btn-primary {
+                @apply bg-primary text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:bg-primary/90 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/50;
+            }
+            .btn-secondary {
+                @apply bg-white text-primary border border-primary px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:bg-primary/5 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/50;
+            }
+            .section-padding {
+                @apply py-16 md:py-24;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="font-inter bg-gradient-to-br from-blue-50 to-indigo-50 min-h-screen">
+    <!-- 导航栏 -->
+    <header class="fixed top-0 w-full bg-white/90 backdrop-blur-sm shadow-sm z-50 transition-all duration-300">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-cube text-primary text-2xl"></i>
+                <h1 class="text-xl font-bold text-gray-800">Qt下载助手</h1>
+            </div>
+            <nav class="hidden md:flex items-center space-x-8">
+                <a href="#home" class="text-gray-700 hover:text-primary transition-colors">首页</a>
+                <a href="#downloads" class="text-gray-700 hover:text-primary transition-colors">下载</a>
+                <a href="#about" class="text-gray-700 hover:text-primary transition-colors">关于</a>
+                <a href="https://www.qt.io/" target="_blank" class="text-gray-700 hover:text-primary transition-colors">Qt官网</a>
+            </nav>
+            <button class="md:hidden text-gray-700 focus:outline-none" id="menu-toggle">
+                <i class="fa fa-bars text-xl"></i>
+            </button>
+        </div>
+        <!-- 移动端菜单 -->
+        <div class="md:hidden hidden bg-white shadow-lg absolute w-full" id="mobile-menu">
+            <div class="container mx-auto px-4 py-4 flex flex-col space-y-4">
+                <a href="#home" class="text-gray-700 hover:text-primary transition-colors py-2">首页</a>
+                <a href="#downloads" class="text-gray-700 hover:text-primary transition-colors py-2">下载</a>
+                <a href="#about" class="text-gray-700 hover:text-primary transition-colors py-2">关于</a>
+                <a href="https://www.qt.io/" target="_blank" class="text-gray-700 hover:text-primary transition-colors py-2">Qt官网</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 英雄区域 -->
+    <section id="home" class="section-padding pt-32 md:pt-40">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center justify-between">
+                <div class="md:w-1/2 mb-10 md:mb-0">
+                    <h1 class="text-[clamp(2rem,5vw,3.5rem)] font-bold text-gray-900 leading-tight mb-4">
+                        Qt 安装包<br/><span class="text-primary">快速下载</span>
+                    </h1>
+                    <p class="text-lg text-gray-600 mb-8 max-w-lg">
+                        我们提供多个版本和不同操作系统的Qt安装包种子文件，帮助您快速获取Qt开发环境。
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <a href="#downloads" class="btn-primary flex items-center justify-center">
+                            <i class="fa fa-download mr-2"></i> 立即下载
+                        </a>
+                        <a href="#about" class="btn-secondary flex items-center justify-center">
+                            <i class="fa fa-info-circle mr-2"></i> 了解更多
+                        </a>
+                    </div>
+                    <div class="flex items-center mt-8 space-x-4">
+                        <div class="flex -space-x-2">
+                            <img src="https://picsum.photos/id/1/40/40" alt="用户头像" class="w-10 h-10 rounded-full border-2 border-white">
+                            <img src="https://picsum.photos/id/2/40/40" alt="用户头像" class="w-10 h-10 rounded-full border-2 border-white">
+                            <img src="https://picsum.photos/id/3/40/40" alt="用户头像" class="w-10 h-10 rounded-full border-2 border-white">
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            <span class="font-bold text-primary">1000+</span> 开发者正在使用
+                        </div>
+                    </div>
+                </div>
+                <div class="md:w-5/12">
+                    <div class="relative">
+                        <div class="absolute -inset-1 bg-gradient-to-r from-primary to-accent rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+                        <div class="relative bg-white rounded-2xl p-6 shadow-xl">
+                            <img src="https://picsum.photos/id/0/600/400" alt="Qt开发环境" class="w-full h-auto rounded-lg mb-4">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">当前推荐</span>
+                                    <h3 class="text-lg font-bold text-gray-900">Qt 5.14.2</h3>
+                                </div>
+                                <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded">最新版本</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 下载区域 -->
+    <section id="downloads" class="py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">选择您需要的Qt版本</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                    我们提供多种操作系统和版本的Qt安装包种子文件，您可以使用任何主流的BT客户端进行下载。
+                </p>
+            </div>
+
+            <!-- 搜索和过滤选项 -->
+            <div class="mb-10">
+                <!-- 搜索框 -->
+                <div class="mb-6 relative">
+                    <div class="relative max-w-xl mx-auto">
+                        <input type="text" id="search-input" placeholder="搜索Qt版本..." 
+                               class="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all">
+                        <i class="fa fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <button id="clear-search" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors hidden">
+                            <i class="fa fa-times-circle"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex flex-wrap gap-3 mb-6">
+                    <button class="px-4 py-2 rounded-full bg-primary text-white font-medium" onclick="filterByVersion('all')">
+                        所有版本
+                    </button>
+                    <button class="px-4 py-2 rounded-full bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-colors" onclick="filterByVersion('5.12')">
+                        5.12.x
+                    </button>
+                    <button class="px-4 py-2 rounded-full bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-colors" onclick="filterByVersion('5.13')">
+                        5.13.x
+                    </button>
+                    <button class="px-4 py-2 rounded-full bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-colors" onclick="filterByVersion('5.14')">
+                        5.14.x
+                    </button>
+                </div>
+                
+                <div class="flex flex-wrap gap-3">
+                    <button class="px-4 py-2 rounded-full bg-primary text-white font-medium" onclick="filterByOS('all')">
+                        所有操作系统
+                    </button>
+                    <button class="px-4 py-2 rounded-full bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-colors flex items-center" onclick="filterByOS('windows')">
+                        <i class="fa fa-windows mr-2"></i> Windows
+                    </button>
+                    <button class="px-4 py-2 rounded-full bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-colors flex items-center" onclick="filterByOS('mac')">
+                        <i class="fa fa-apple mr-2"></i> macOS
+                    </button>
+                    <button class="px-4 py-2 rounded-full bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition-colors flex items-center" onclick="filterByOS('linux')">
+                        <i class="fa fa-linux mr-2"></i> Linux
+                    </button>
+                </div>
+            </div>
+
+            <!-- 下载列表 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="download-grid">
+                <!-- Windows 版本 -->
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm card-hover" data-version="5.12" data-os="windows">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <i class="fa fa-windows text-blue-600 text-2xl mr-3"></i>
+                                <div>
+                                    <h3 class="font-semibold text-lg text-gray-900">Qt 5.12.12</h3>
+                                    <p class="text-sm text-gray-500">Windows (32-bit)</p>
+                                </div>
+                            </div>
+                            <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">5.12.x</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500 mb-4">
+                            <span class="flex items-center mr-4"><i class="fa fa-file-archive-o mr-1"></i> EXE</span>
+                            <span class="flex items-center"><i class="fa fa-clock-o mr-1"></i> 2021-01</span>
+                        </div>
+                        <a href="torrent/qt-opensource-windows-x86-5.12.12.exe.torrent" class="w-full btn-primary flex items-center justify-center">
+                            <i class="fa fa-magnet mr-2"></i> 下载种子
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm card-hover" data-version="5.13" data-os="windows">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <i class="fa fa-windows text-blue-600 text-2xl mr-3"></i>
+                                <div>
+                                    <h3 class="font-semibold text-lg text-gray-900">Qt 5.13.0</h3>
+                                    <p class="text-sm text-gray-500">Windows (32-bit)</p>
+                                </div>
+                            </div>
+                            <span class="bg-purple-100 text-purple-800 text-xs font-semibold px-2.5 py-0.5 rounded">5.13.x</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500 mb-4">
+                            <span class="flex items-center mr-4"><i class="fa fa-file-archive-o mr-1"></i> EXE</span>
+                            <span class="flex items-center"><i class="fa fa-clock-o mr-1"></i> 2019-06</span>
+                        </div>
+                        <a href="torrent/qt-opensource-windows-x86-5.13.0.exe.torrent" class="w-full btn-primary flex items-center justify-center">
+                            <i class="fa fa-magnet mr-2"></i> 下载种子
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm card-hover" data-version="5.13" data-os="windows">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <i class="fa fa-windows text-blue-600 text-2xl mr-3"></i>
+                                <div>
+                                    <h3 class="font-semibold text-lg text-gray-900">Qt 5.13.1</h3>
+                                    <p class="text-sm text-gray-500">Windows (32-bit)</p>
+                                </div>
+                            </div>
+                            <span class="bg-purple-100 text-purple-800 text-xs font-semibold px-2.5 py-0.5 rounded">5.13.x</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500 mb-4">
+                            <span class="flex items-center mr-4"><i class="fa fa-file-archive-o mr-1"></i> EXE</span>
+                            <span class="flex items-center"><i class="fa fa-clock-o mr-1"></i> 2019-09</span>
+                        </div>
+                        <a href="torrent/qt-opensource-windows-x86-5.13.1.exe.torrent" class="w-full btn-primary flex items-center justify-center">
+                            <i class="fa fa-magnet mr-2"></i> 下载种子
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm card-hover" data-version="5.13" data-os="windows">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <i class="fa fa-windows text-blue-600 text-2xl mr-3"></i>
+                                <div>
+                                    <h3 class="font-semibold text-lg text-gray-900">Qt 5.13.2</h3>
+                                    <p class="text-sm text-gray-500">Windows (32-bit)</p>
+                                </div>
+                            </div>
+                            <span class="bg-purple-100 text-purple-800 text-xs font-semibold px-2.5 py-0.5 rounded">5.13.x</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500 mb-4">
+                            <span class="flex items-center mr-4"><i class="fa fa-file-archive-o mr-1"></i> EXE</span>
+                            <span class="flex items-center"><i class="fa fa-clock-o mr-1"></i> 2019-12</span>
+                        </div>
+                        <a href="torrent/qt-opensource-windows-x86-5.13.2.exe.torrent" class="w-full btn-primary flex items-center justify-center">
+                            <i class="fa fa-magnet mr-2"></i> 下载种子
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm card-hover" data-version="5.14" data-os="windows">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <i class="fa fa-windows text-blue-600 text-2xl mr-3"></i>
+                                <div>
+                                    <h3 class="font-semibold text-lg text-gray-900">Qt 5.14.0</h3>
+                                    <p class="text-sm text-gray-500">Windows (32-bit)</p>
+                                </div>
+                            </div>
+                            <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded">5.14.x</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500 mb-4">
+                            <span class="flex items-center mr-4"><i class="fa fa-file-archive-o mr-1"></i> EXE</span>
+                            <span class="flex items-center"><i class="fa fa-clock-o mr-1"></i> 2020-04</span>
+                        </div>
+                        <a href="torrent/qt-opensource-windows-x86-5.14.0.exe.torrent" class="w-full btn-primary flex items-center justify-center">
+                            <i class="fa fa-magnet mr-2"></i> 下载种子
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm card-hover" data-version="5.14" data-os="windows">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <i class="fa fa-windows text-blue-600 text-2xl mr-3"></i>
+                                <div>
+                                    <h3 class="font-semibold text-lg text-gray-900">Qt 5.14.1</h3>
+                                    <p class="text-sm text-gray-500">Windows (32-bit)</p>
+                                </div>
+                            </div>
+                            <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded">5.14.x</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500 mb-4">
+                            <span class="flex items-center mr-4"><i class="fa fa-file-archive-o mr-1"></i> EXE</span>
+                            <span class="flex items-center"><i class="fa fa-clock-o mr-1"></i> 2020-07</span>
+                        </div>
+                        <a href="torrent/qt-opensource-windows-x86-5.14.1.exe.torrent" class="w-full btn-primary flex items-center justify-center">
+                            <i class="fa fa-magnet mr-2"></i> 下载种子
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm card-hover" data-version="5.14" data-os="windows">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <i class="fa fa-windows text-blue-600 text-2xl mr-3"></i>
+                                <div>
+                                    <h3 class="font-semibold text-lg text-gray-900">Qt 5.14.2</h3>
+                                    <p class="text-sm text-gray-500">Windows (32-bit)</p>
+                                </div>
+                            </div>
+                            <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded">5.14.x</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500 mb-4">
+                            <span class="flex items-center mr-4"><i class="fa fa-file-archive-o mr-1"></i> EXE</span>
+                            <span class="flex items-center"><i class="fa fa-clock-o mr-1"></i> 2020-11</span>
+                        </div>
+                        <a href="torrent/qt-opensource-windows-x86-5.14.2.exe.torrent" class="w-full btn-primary flex items-center justify-center">
+                            <i class="fa fa-magnet mr-2"></i> 下载种子
+                        </a>
+                    </div>
+                </div>
+
+                <!-- macOS 版本 -->
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm card-hover" data-version="5.12" data-os="mac">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <i class="fa fa-apple text-gray-700 text-2xl mr-3"></i>
+                                <div>
+                                    <h3 class="font-semibold text-lg text-gray-900">Qt 5.12.12</h3>
+                                    <p class="text-sm text-gray-500">macOS (64-bit)</p>
+                                </div>
+                            </div>
+                            <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">5.12.x</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500 mb-4">
+                            <span class="flex items-center mr-4"><i class="fa fa-file-archive-o mr-1"></i> DMG</span>
+                            <span class="flex items-center"><i class="fa fa-clock-o mr-1"></i> 2021-01</span>
+                        </div>
+                        <a href="torrent/qt-opensource-mac-x64-5.12.12.dmg.torrent" class="w-full btn-primary flex items-center justify-center">
+                            <i class="fa fa-magnet mr-2"></i> 下载种子
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm card-hover" data-version="5.13" data-os="mac">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <i class="fa fa-apple text-gray-700 text-2xl mr-3"></i>
+                                <div>
+                                    <h3 class="font-semibold text-lg text-gray-900">Qt 5.13.0</h3>
+                                    <p class="text-sm text-gray-500">macOS (64-bit)</p>
+                                </div>
+                            </div>
+                            <span class="bg-purple-100 text-purple-800 text-xs font-semibold px-2.5 py-0.5 rounded">5.13.x</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500 mb-4">
+                            <span class="flex items-center mr-4"><i class="fa fa-file-archive-o mr-1"></i> DMG</span>
+                            <span class="flex items-center"><i class="fa fa-clock-o mr-1"></i> 2019-06</span>
+                        </div>
+                        <a href="torrent/qt-opensource-mac-x64-5.13.0.dmg.torrent" class="w-full btn-primary flex items-center justify-center">
+                            <i class="fa fa-magnet mr-2"></i> 下载种子
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm card-hover" data-version="5.13" data-os="mac">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <i class="fa fa-apple text-gray-700 text-2xl mr-3"></i>
+                                <div>
+                                    <h3 class="font-semibold text-lg text-gray-900">Qt 5.13.1</h3>
+                                    <p class="text-sm text-gray-500">macOS (64-bit)</p>
+                                </div>
+                            </div>
+                            <span class="bg-purple-100 text-purple-800 text-xs font-semibold px-2.5 py-0.5 rounded">5.13.x</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500 mb-4">
+                            <span class="flex items-center mr-4"><i class="fa fa-file-archive-o mr-1"></i> DMG</span>
+                            <span class="flex items-center"><i class="fa fa-clock-o mr-1"></i> 2019-09</span>
+                        </div>
+                        <a href="torrent/qt-opensource-mac-x64-5.13.1.dmg.torrent" class="w-full btn-primary flex items-center justify-center">
+                            <i class="fa fa-magnet mr-2"></i> 下载种子
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm card-hover" data-version="5.13" data-os="mac">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <i class="fa fa-apple text-gray-700 text-2xl mr-3"></i>
+                                <div>
+                                    <h3 class="font-semibold text-lg text-gray-900">Qt 5.13.2</h3>
+                                    <p class="text-sm text-gray-500">macOS (64-bit)</p>
+                                </div>
+                            </div>
+                            <span class="bg-purple-100 text-purple-800 text-xs font-semibold px-2.5 py-0.5 rounded">5.13.x</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500 mb-4">
+                            <span class="flex items-center mr-4"><i class="fa fa-file-archive-o mr-1"></i> DMG</span>
+                            <span class="flex items-center"><i class="fa fa-clock-o mr-1"></i> 2019-12</span>
+                        </div>
+                        <a href="torrent/qt-opensource-mac-x64-5.13.2.dmg.torrent" class="w-full btn-primary flex items-center justify-center">
+                            <i class="fa fa-magnet mr-2"></i> 下载种子
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm card-hover" data-version="5.14" data-os="mac">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <i class="fa fa-apple text-gray-700 text-2xl mr-3"></i>
+                                <div>
+                                    <h3 class="font-semibold text-lg text-gray-900">Qt 5.14.0</h3>
+                                    <p class="text-sm text-gray-500">macOS (64-bit)</p>
+                                </div>
+                            </div>
+                            <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded">5.14.x</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500 mb-4">
+                            <span class="flex items-center mr-4"><i class="fa fa-file-archive-o mr-1"></i> DMG</span>
+                            <span class="flex items-center"><i class="fa fa-clock-o mr-1"></i> 2020-04</span>
+                        </div>
+                        <a href="torrent/qt-opensource-mac-x64-5.14.0.dmg.torrent" class="w-full btn-primary flex items-center justify-center">
+                            <i class="fa fa-magnet mr-2"></i> 下载种子
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm card-hover" data-version="5.14" data-os="mac">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <i class="fa fa-apple text-gray-700 text-2xl mr-3"></i>
+                                <div>
+                                    <h3 class="font-semibold text-lg text-gray-900">Qt 5.14.1</h3>
+                                    <p class="text-sm text-gray-500">macOS (64-bit)</p>
+                                </div>
+                            </div>
+                            <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded">5.14.x</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500 mb-4">
+                            <span class="flex items-center mr-4"><i class="fa fa-file-archive-o mr-1"></i> DMG</span>
+                            <span class="flex items-center"><i class="fa fa-clock-o mr-1"></i> 2020-07</span>
+                        </div>
+                        <a href="torrent/qt-opensource-mac-x64-5.14.1.dmg.torrent" class="w-full btn-primary flex items-center justify-center">
+                            <i class="fa fa-magnet mr-2"></i> 下载种子
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm card-hover" data-version="5.14" data-os="mac">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <i class="fa fa-apple text-gray-700 text-2xl mr-3"></i>
+                                <div>
+                                    <h3 class="font-semibold text-lg text-gray-900">Qt 5.14.2</h3>
+                                    <p class="text-sm text-gray-500">macOS (64-bit)</p>
+                                </div>
+                            </div>
+                            <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded">5.14.x</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500 mb-4">
+                            <span class="flex items-center mr-4"><i class="fa fa-file-archive-o mr-1"></i> DMG</span>
+                            <span class="flex items-center"><i class="fa fa-clock-o mr-1"></i> 2020-11</span>
+                        </div>
+                        <a href="torrent/qt-opensource-mac-x64-5.14.2.dmg.torrent" class="w-full btn-primary flex items-center justify-center">
+                            <i class="fa fa-magnet mr-2"></i> 下载种子
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Linux 版本 -->
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm card-hover" data-version="5.12" data-os="linux">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <i class="fa fa-linux text-orange-600 text-2xl mr-3"></i>
+                                <div>
+                                    <h3 class="font-semibold text-lg text-gray-900">Qt 5.12.12</h3>
+                                    <p class="text-sm text-gray-500">Linux (64-bit)</p>
+                                </div>
+                            </div>
+                            <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">5.12.x</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500 mb-4">
+                            <span class="flex items-center mr-4"><i class="fa fa-file-archive-o mr-1"></i> RUN</span>
+                            <span class="flex items-center"><i class="fa fa-clock-o mr-1"></i> 2021-01</span>
+                        </div>
+                        <a href="torrent/qt-opensource-linux-x64-5.12.12.run.torrent" class="w-full btn-primary flex items-center justify-center">
+                            <i class="fa fa-magnet mr-2"></i> 下载种子
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm card-hover" data-version="5.13" data-os="linux">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <i class="fa fa-linux text-orange-600 text-2xl mr-3"></i>
+                                <div>
+                                    <h3 class="font-semibold text-lg text-gray-900">Qt 5.13.0</h3>
+                                    <p class="text-sm text-gray-500">Linux (64-bit)</p>
+                                </div>
+                            </div>
+                            <span class="bg-purple-100 text-purple-800 text-xs font-semibold px-2.5 py-0.5 rounded">5.13.x</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500 mb-4">
+                            <span class="flex items-center mr-4"><i class="fa fa-file-archive-o mr-1"></i> RUN</span>
+                            <span class="flex items-center"><i class="fa fa-clock-o mr-1"></i> 2019-06</span>
+                        </div>
+                        <a href="torrent/qt-opensource-linux-x64-5.13.0.run.torrent" class="w-full btn-primary flex items-center justify-center">
+                            <i class="fa fa-magnet mr-2"></i> 下载种子
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm card-hover" data-version="5.13" data-os="linux">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <i class="fa fa-linux text-orange-600 text-2xl mr-3"></i>
+                                <div>
+                                    <h3 class="font-semibold text-lg text-gray-900">Qt 5.13.1</h3>
+                                    <p class="text-sm text-gray-500">Linux (64-bit)</p>
+                                </div>
+                            </div>
+                            <span class="bg-purple-100 text-purple-800 text-xs font-semibold px-2.5 py-0.5 rounded">5.13.x</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500 mb-4">
+                            <span class="flex items-center mr-4"><i class="fa fa-file-archive-o mr-1"></i> RUN</span>
+                            <span class="flex items-center"><i class="fa fa-clock-o mr-1"></i> 2019-09</span>
+                        </div>
+                        <a href="torrent/qt-opensource-linux-x64-5.13.1.run.torrent" class="w-full btn-primary flex items-center justify-center">
+                            <i class="fa fa-magnet mr-2"></i> 下载种子
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm card-hover" data-version="5.13" data-os="linux">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <i class="fa fa-linux text-orange-600 text-2xl mr-3"></i>
+                                <div>
+                                    <h3 class="font-semibold text-lg text-gray-900">Qt 5.13.2</h3>
+                                    <p class="text-sm text-gray-500">Linux (64-bit)</p>
+                                </div>
+                            </div>
+                            <span class="bg-purple-100 text-purple-800 text-xs font-semibold px-2.5 py-0.5 rounded">5.13.x</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500 mb-4">
+                            <span class="flex items-center mr-4"><i class="fa fa-file-archive-o mr-1"></i> RUN</span>
+                            <span class="flex items-center"><i class="fa fa-clock-o mr-1"></i> 2019-12</span>
+                        </div>
+                        <a href="torrent/qt-opensource-linux-x64-5.13.2.run.torrent" class="w-full btn-primary flex items-center justify-center">
+                            <i class="fa fa-magnet mr-2"></i> 下载种子
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm card-hover" data-version="5.14" data-os="linux">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <i class="fa fa-linux text-orange-600 text-2xl mr-3"></i>
+                                <div>
+                                    <h3 class="font-semibold text-lg text-gray-900">Qt 5.14.0</h3>
+                                    <p class="text-sm text-gray-500">Linux (64-bit)</p>
+                                </div>
+                            </div>
+                            <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded">5.14.x</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500 mb-4">
+                            <span class="flex items-center mr-4"><i class="fa fa-file-archive-o mr-1"></i> RUN</span>
+                            <span class="flex items-center"><i class="fa fa-clock-o mr-1"></i> 2020-04</span>
+                        </div>
+                        <a href="torrent/qt-opensource-linux-x64-5.14.0.run.torrent" class="w-full btn-primary flex items-center justify-center">
+                            <i class="fa fa-magnet mr-2"></i> 下载种子
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm card-hover" data-version="5.14" data-os="linux">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <i class="fa fa-linux text-orange-600 text-2xl mr-3"></i>
+                                <div>
+                                    <h3 class="font-semibold text-lg text-gray-900">Qt 5.14.1</h3>
+                                    <p class="text-sm text-gray-500">Linux (64-bit)</p>
+                                </div>
+                            </div>
+                            <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded">5.14.x</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500 mb-4">
+                            <span class="flex items-center mr-4"><i class="fa fa-file-archive-o mr-1"></i> RUN</span>
+                            <span class="flex items-center"><i class="fa fa-clock-o mr-1"></i> 2020-07</span>
+                        </div>
+                        <a href="torrent/qt-opensource-linux-x64-5.14.1.run.torrent" class="w-full btn-primary flex items-center justify-center">
+                            <i class="fa fa-magnet mr-2"></i> 下载种子
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm card-hover" data-version="5.14" data-os="linux">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <i class="fa fa-linux text-orange-600 text-2xl mr-3"></i>
+                                <div>
+                                    <h3 class="font-semibold text-lg text-gray-900">Qt 5.14.2</h3>
+                                    <p class="text-sm text-gray-500">Linux (64-bit)</p>
+                                </div>
+                            </div>
+                            <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded">5.14.x</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500 mb-4">
+                            <span class="flex items-center mr-4"><i class="fa fa-file-archive-o mr-1"></i> RUN</span>
+                            <span class="flex items-center"><i class="fa fa-clock-o mr-1"></i> 2020-11</span>
+                        </div>
+                        <a href="torrent/qt-opensource-linux-x64-5.14.2.run.torrent" class="w-full btn-primary flex items-center justify-center">
+                            <i class="fa fa-magnet mr-2"></i> 下载种子
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 使用指南 -->
+    <section id="guide" class="py-20 bg-gradient-to-br from-blue-50 to-indigo-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">如何使用种子下载</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                    按照以下简单步骤，快速获取您需要的Qt安装包。
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white rounded-xl shadow-sm p-8 card-hover">
+                    <div class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mb-6">
+                        <i class="fa fa-download text-primary text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">步骤一：下载种子文件</h3>
+                    <p class="text-gray-600">
+                        从上方列表中选择您需要的Qt版本和操作系统，点击"下载种子"按钮获取.torrent文件。
+                    </p>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm p-8 card-hover">
+                    <div class="w-14 h-14 bg-purple-100 rounded-full flex items-center justify-center mb-6">
+                        <i class="fa fa-magnet text-purple-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">步骤二：使用BT客户端打开</h3>
+                    <p class="text-gray-600">
+                        确保您的电脑上安装了BT下载客户端（如μTorrent、BitComet、Transmission等），双击种子文件开始下载。
+                    </p>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm p-8 card-hover">
+                    <div class="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mb-6">
+                        <i class="fa fa-cog text-green-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">步骤三：安装Qt</h3>
+                    <p class="text-gray-600">
+                        下载完成后，运行安装程序，按照向导完成Qt的安装。Windows系统双击.exe文件，macOS系统打开.dmg文件，Linux系统赋予.run文件执行权限并运行。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 关于区域 -->
+    <section id="about" class="py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center gap-12">
+                <div class="md:w-1/2">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-6">关于Qt</h2>
+                    <p class="text-lg text-gray-600 mb-6">
+                        Qt是一个跨平台的C++应用程序开发框架，广泛用于开发GUI程序，也可用于开发非GUI程序，如控制台工具和服务器。
+                    </p>
+                    <p class="text-lg text-gray-600 mb-8">
+                        Qt提供了丰富的API和工具，使开发者能够高效地创建美观、功能强大的应用程序，支持Windows、macOS、Linux、Android和iOS等多种平台。
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <a href="https://www.qt.io/" target="_blank" class="btn-primary flex items-center">
+                            <i class="fa fa-external-link mr-2"></i> 访问Qt官网
+                        </a>
+                        <a href="https://doc.qt.io/" target="_blank" class="btn-secondary flex items-center">
+                            <i class="fa fa-book mr-2"></i> 查看文档
+                        </a>
+                    </div>
+                </div>
+                <div class="md:w-1/2">
+                    <div class="relative">
+                        <div class="absolute -inset-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition duration-1000 group-hover:duration-200"></div>
+                        <div class="relative bg-white rounded-2xl p-6 shadow-xl">
+                            <img src="https://picsum.photos/id/20/600/400" alt="Qt开发" class="w-full h-auto rounded-lg">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+                <div class="flex items-center space-x-2 mb-6 md:mb-0">
+                    <i class="fa fa-cube text-primary text-2xl"></i>
+                    <h1 class="text-xl font-bold">Qt下载助手</h1>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="https://github.com" target="_blank" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa fa-github text-xl"></i>
+                    </a>
+                    <a href="https://twitter.com" target="_blank" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa fa-twitter text-xl"></i>
+                    </a>
+                    <a href="https://www.youtube.com" target="_blank" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa fa-youtube-play text-xl"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-8">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <p class="text-gray-400 mb-4 md:mb-0">
+                        &copy; 2025 Qt下载助手. 保留所有权利.
+                    </p>
+                    <div class="flex space-x-6">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors text-sm">隐私政策</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors text-sm">使用条款</a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors text-sm">联系我们</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" class="fixed bottom-8 right-8 bg-primary text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg opacity-0 invisible transition-all duration-300 hover:bg-primary/90">
+        <i class="fa fa-arrow-up"></i>
+    </button>
+
+    <script>
+        // 移动端菜单切换
+        const menuToggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        menuToggle.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // 版本和操作系统过滤功能
+        let currentVersionFilter = 'all';
+        let currentOSFilter = 'all';
+        let searchKeyword = '';
+        
+        // 搜索功能
+        const searchInput = document.getElementById('search-input');
+        const clearSearchBtn = document.getElementById('clear-search');
+        
+        searchInput.addEventListener('input', (e) => {
+            searchKeyword = e.target.value.toLowerCase().trim();
+            
+            // 显示或隐藏清除按钮
+            if (searchKeyword) {
+                clearSearchBtn.classList.remove('hidden');
+            } else {
+                clearSearchBtn.classList.add('hidden');
+            }
+            
+            updateFilters();
+        });
+        
+        clearSearchBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            searchKeyword = '';
+            clearSearchBtn.classList.add('hidden');
+            updateFilters();
+        });
+        
+        function filterByVersion(version) {
+            currentVersionFilter = version;
+            updateFilters();
+            
+            // 更新按钮样式
+            document.querySelectorAll('[onclick^="filterByVersion"]').forEach(btn => {
+                if (btn.textContent.includes(version === 'all' ? '所有版本' : version)) {
+                    btn.classList.remove('bg-gray-100', 'text-gray-700');
+                    btn.classList.add('bg-primary', 'text-white');
+                } else {
+                    btn.classList.remove('bg-primary', 'text-white');
+                    btn.classList.add('bg-gray-100', 'text-gray-700');
+                }
+            });
+        }
+        
+        function filterByOS(os) {
+            currentOSFilter = os;
+            updateFilters();
+            
+            // 更新按钮样式
+            document.querySelectorAll('[onclick^="filterByOS"]').forEach(btn => {
+                if (btn.textContent.includes(os === 'all' ? '所有操作系统' : 
+                    (os === 'windows' ? 'Windows' : 
+                     os === 'mac' ? 'macOS' : 'Linux'))) {
+                    btn.classList.remove('bg-gray-100', 'text-gray-700');
+                    btn.classList.add('bg-primary', 'text-white');
+                } else {
+                    btn.classList.remove('bg-primary', 'text-white');
+                    btn.classList.add('bg-gray-100', 'text-gray-700');
+                }
+            });
+        }
+        
+        function updateFilters() {
+            const items = document.querySelectorAll('#download-grid > div');
+            let visibleCount = 0;
+            
+            items.forEach(item => {
+                const versionMatch = currentVersionFilter === 'all' || item.dataset.version === currentVersionFilter;
+                const osMatch = currentOSFilter === 'all' || item.dataset.os === currentOSFilter;
+                
+                // 搜索匹配逻辑
+                let searchMatch = true;
+                if (searchKeyword) {
+                    const itemText = item.textContent.toLowerCase();
+                    searchMatch = itemText.includes(searchKeyword);
+                }
+                
+                if (versionMatch && osMatch && searchMatch) {
+                    item.style.display = 'block';
+                    visibleCount++;
+                    // 添加淡入动画
+                    item.style.opacity = '0';
+                    item.style.transform = 'translateY(10px)';
+                    setTimeout(() => {
+                        item.style.transition = 'opacity 300ms ease, transform 300ms ease';
+                        item.style.opacity = '1';
+                        item.style.transform = 'translateY(0)';
+                    }, 50);
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            // 如果没有匹配的结果，显示提示信息
+            const noResults = document.getElementById('no-results');
+            if (!noResults) {
+                // 创建无结果提示元素
+                const noResultsDiv = document.createElement('div');
+                noResultsDiv.id = 'no-results';
+                noResultsDiv.className = 'col-span-full text-center py-12 hidden';
+                noResultsDiv.innerHTML = `
+                    <div class="mb-4 text-gray-400">
+                        <i class="fa fa-search fa-4x"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">未找到匹配的结果</h3>
+                    <p class="text-gray-500">请尝试使用不同的搜索关键词或调整筛选条件</p>
+                    <button onclick="clearSearchAndFilters()" class="mt-4 px-4 py-2 rounded-full bg-primary text-white font-medium">
+                        清除所有筛选
+                    </button>
+                `;
+                document.getElementById('download-grid').parentElement.appendChild(noResultsDiv);
+            }
+            
+            const noResultsElement = document.getElementById('no-results');
+            if (visibleCount === 0) {
+                noResultsElement.classList.remove('hidden');
+            } else {
+                noResultsElement.classList.add('hidden');
+            }
+        }
+        
+        // 清除所有筛选条件
+        function clearSearchAndFilters() {
+            searchInput.value = '';
+            searchKeyword = '';
+            clearSearchBtn.classList.add('hidden');
+            
+            filterByVersion('all');
+            filterByOS('all');
+        }
+
+        // 动态生成下载项
+        function generateDownloadItems() {
+            const downloadGrid = document.getElementById('download-grid');
+            // 清空现有内容
+            downloadGrid.innerHTML = '';
+            
+            // 遍历torrent文件数据
+            torrentFiles.forEach(file => {
+                // 创建下载卡片
+                const card = document.createElement('div');
+                card.className = 'bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm card-hover';
+                card.dataset.version = file.version_prefix;
+                card.dataset.os = file.os;
+                
+                // 设置卡片内容
+                const osIcon = {
+                    'windows': 'fa-windows text-blue-600',
+                    'mac': 'fa-apple text-gray-700',
+                    'linux': 'fa-linux text-orange-600'
+                }[file.os];
+                
+                const versionClass = {
+                    '5.12': 'bg-blue-100 text-blue-800',
+                    '5.13': 'bg-purple-100 text-purple-800',
+                    '5.14': 'bg-green-100 text-green-800'
+                }[file.version_prefix] || 'bg-gray-100 text-gray-800';
+                
+                card.innerHTML = `
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center">
+                                <i class="fa ${osIcon} text-2xl mr-3"></i>
+                                <div>
+                                    <h3 class="font-semibold text-lg text-gray-900">Qt ${file.version}</h3>
+                                    <p class="text-sm text-gray-500">${file.os_display}</p>
+                                </div>
+                            </div>
+                            <span class="${versionClass} text-xs font-semibold px-2.5 py-0.5 rounded">${file.version_prefix}.x</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-500 mb-4">
+                            <span class="flex items-center mr-4"><i class="fa fa-file-archive-o mr-1"></i> ${file.extension}</span>
+                            <span class="flex items-center mr-4"><i class="fa fa-file-size-o mr-1"></i> ${file.file_size}</span>
+                            <span class="flex items-center"><i class="fa fa-clock-o mr-1"></i> ${file.release_date}</span>
+                        </div>
+                        <a href="torrent/${file.filename}" class="w-full btn-primary flex items-center justify-center" onclick="trackDownload('${file.filename}')">
+                            <i class="fa fa-magnet mr-2"></i> 下载种子
+                        </a>
+                    </div>
+                `;
+                
+                downloadGrid.appendChild(card);
+            });
+        }
+        
+        // 跟踪下载
+        function trackDownload(filename) {
+            console.log(`Downloading: ${filename}`);
+            // 这里可以添加下载统计逻辑
+        }
+
+        // 返回顶部按钮
+        const backToTopButton = document.getElementById('back-to-top');
+        
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.remove('opacity-0', 'invisible');
+                backToTopButton.classList.add('opacity-100', 'visible');
+            } else {
+                backToTopButton.classList.remove('opacity-100', 'visible');
+                backToTopButton.classList.add('opacity-0', 'invisible');
+            }
+        });
+        
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    // 关闭移动端菜单（如果打开）
+                    if (!mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                    
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80, // 考虑导航栏高度
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // 导航栏滚动效果
+        const header = document.querySelector('header');
+        let lastScrollY = window.scrollY;
+        
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 100) {
+                header.classList.add('py-2', 'shadow-md');
+                header.classList.remove('py-4', 'shadow-sm');
+            } else {
+                header.classList.add('py-4', 'shadow-sm');
+                header.classList.remove('py-2', 'shadow-md');
+            }
+            
+            lastScrollY = window.scrollY;
+        });
+
+        // 页面加载时的动画和初始化
+        window.addEventListener('load', () => {
+            generateDownloadItems();
+            document.body.classList.add('loaded');
+        });
+    </script>
+</body>
+</html>
